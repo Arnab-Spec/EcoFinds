@@ -2,7 +2,7 @@
 
 EcoFinds is a modern web application that serves as a platform for buying and selling pre-owned goods sustainably. The project aims to promote eco-conscious consumption by giving items a second life, reducing waste, and contributing to a more sustainable future.
 
-![EcoFinds Marketplace](public/placeholder.svg)
+![EcoFinds Marketplace](public/home.png)
 
 ## 🌱 Features
 
