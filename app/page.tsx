@@ -36,12 +36,12 @@ export default function Home() {
                 </Button>
               </div>
             </div>
-            <div className="mx-auto lg:mx-0 relative h-[350px] w-full max-w-[500px] lg:h-[450px]">
+            <div className="mx-auto lg:mx-0 relative h-[450px] w-full max-w-[600px] lg:h-[550px]">
               <Image
-                src="/placeholder.svg?height=450&width=500"
+                src="/eco-hero.png"
                 alt="EcoFinds Marketplace"
                 fill
-                className="object-cover rounded-lg"
+                className="object-contain rounded-lg"
                 priority
               />
             </div>
@@ -173,3 +173,6 @@ export default function Home() {
     </main>
   )
 }
+
+
+
