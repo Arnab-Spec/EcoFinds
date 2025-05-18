@@ -29,8 +29,6 @@ EcoFinds is a modern web application that serves as a platform for buying and se
 - [Node.js](https://nodejs.org/) (v18.17.0 or higher)
 - [npm](https://www.npmjs.com/) or [pnpm](https://pnpm.io/) (recommended)
 
-The Prototype Video :- [Video](https://drive.google.com/file/d/18AQHMEe42tv3dROWUW5KdDJEu-DXe-iZ/view?usp=sharing)
-
 ## 🛠️ Installation
 
 1. Clone the repository:
