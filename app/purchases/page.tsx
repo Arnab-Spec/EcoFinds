@@ -10,6 +10,7 @@ import { ShoppingBag } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 import Navbar from "@/components/navbar"
 
 export default function PurchasesPage() {
@@ -18,10 +19,22 @@ export default function PurchasesPage() {
   const { getProductById } = useProducts()
   const router = useRouter()
 
-  // Redirect if not logged in
+  // Handle redirection and data fetching in useEffect to avoid SSR issues
+  useEffect(() => {
+    if (!user) {
+      router.push("/auth/login")
+    }
+  }, [user, router])
+
+  // If not logged in, show loading state
   if (!user) {
-    router.push("/auth/login")
-    return null
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-center">
+          <p className="text-lg">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   const userPurchases = getUserPurchases(user.id)
@@ -43,7 +56,7 @@ export default function PurchasesPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container px-4 py-8 md:px-6">
+      <main className="flex-1 container py-8">
         <h1 className="text-3xl font-bold mb-8">Your Purchases</h1>
 
         {enrichedPurchases.length === 0 ? (
@@ -82,7 +95,7 @@ export default function PurchasesPage() {
                         <p className="text-sm text-muted-foreground">{purchase.product?.category}</p>
                       </div>
                       <div className="mt-2 md:mt-0 text-right">
-                        <p className="font-medium">${purchase.price.toFixed(2)}</p>
+                        <p className="font-medium">₹{purchase.price.toFixed(2)}</p>
                         <p className="text-xs text-muted-foreground">
                           Purchased {formatDistanceToNow(new Date(purchase.purchaseDate), { addSuffix: true })}
                         </p>

@@ -17,11 +17,18 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
-  const { register, isLoading } = useAuth()
+  const { register, isLoading, validatePassword } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    // Validate password
+    const passwordCheck = validatePassword(password)
+    if (!passwordCheck.valid) {
+      setError(passwordCheck.message)
+      return
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match")
@@ -71,9 +78,13 @@ export default function RegisterPage() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  setError("")
+                }}
                 required
               />
+              <p className="text-xs text-muted-foreground">Password must be at least 8 characters long</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirm-password">Confirm Password</Label>
@@ -81,7 +92,10 @@ export default function RegisterPage() {
                 id="confirm-password"
                 type="password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value)
+                  setError("")
+                }}
                 required
               />
             </div>

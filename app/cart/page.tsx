@@ -5,16 +5,17 @@ import { useCart } from "@/context/cart-context"
 import { useProducts } from "@/context/product-context"
 import { usePurchases } from "@/context/purchase-context"
 import { useAuth } from "@/context/auth-context"
-import { Minus, Plus, Trash } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
 import Navbar from "@/components/navbar"
+import Footer from "@/components/footer"
+import { Minus, Plus, Trash2 } from "lucide-react"
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, clearCart, getCartTotal } = useCart()
-  const { products } = useProducts()
+  const { getProductById } = useProducts()
   const { addPurchase } = usePurchases()
   const { user } = useAuth()
   const router = useRouter()
@@ -22,13 +23,13 @@ export default function CartPage() {
 
   const cartItems = cart
     .map((item) => {
-      const product = products.find((p) => p.id === item.productId)
+      const product = getProductById(item.productId)
       return {
         ...item,
         product,
       }
     })
-    .filter((item) => item.product)
+    .filter((item) => item.product) // Filter out purchases with missing products
 
   const handleCheckout = () => {
     if (!user) {
@@ -58,7 +59,7 @@ export default function CartPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container px-4 py-8 md:px-6">
+      <main className="flex-1 container py-8">
         <h1 className="text-3xl font-bold mb-8">Your Cart</h1>
 
         {cartItems.length === 0 ? (
@@ -90,14 +91,14 @@ export default function CartPage() {
                       {item.product?.title}
                     </Link>
                     <p className="text-sm text-muted-foreground line-clamp-1">{item.product?.category}</p>
-                    <p className="mt-1 font-medium">${(item.product?.price || 0).toFixed(2)}</p>
+                    <p className="mt-1 font-medium">₹{(item.product?.price || 0).toFixed(2)}</p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="outline"
                       size="icon"
                       className="h-8 w-8"
-                      onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                      onClick={() => updateQuantity(item.productId, Math.max(1, item.quantity - 1))}
                       disabled={item.quantity <= 1}
                     >
                       <Minus className="h-4 w-4" />
@@ -112,46 +113,41 @@ export default function CartPage() {
                       <Plus className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="icon"
-                      className="h-8 w-8 text-red-500"
+                      className="h-8 w-8 ml-2 text-red-500 hover:text-red-600 hover:bg-red-50"
                       onClick={() => removeFromCart(item.productId)}
                     >
-                      <Trash className="h-4 w-4" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               ))}
             </div>
-
-            <div className="md:col-span-1">
-              <div className="border rounded-lg p-6 space-y-4 sticky top-20">
-                <h2 className="text-xl font-semibold">Order Summary</h2>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span>${getCartTotal(products).toFixed(2)}</span>
+            <div className="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg h-fit">
+              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+              <div className="space-y-2 mb-4">
+                {cartItems.map((item) => (
+                  <div key={item.productId} className="flex justify-between text-sm">
+                    <span className="line-clamp-1">{item.product?.title} × {item.quantity}</span>
+                    <span>₹{((item.product?.price || 0) * item.quantity).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Shipping</span>
-                    <span>Free</span>
-                  </div>
-                  <div className="border-t pt-2 mt-2 flex justify-between font-semibold">
-                    <span>Total</span>
-                    <span>${getCartTotal(products).toFixed(2)}</span>
-                  </div>
-                </div>
-                <Button className="w-full bg-green-600 hover:bg-green-700" onClick={handleCheckout}>
-                  Checkout
-                </Button>
-                <Button variant="outline" className="w-full" onClick={clearCart}>
-                  Clear Cart
-                </Button>
+                ))}
               </div>
+              <div className="border-t pt-4 mt-4">
+                <div className="flex justify-between font-semibold">
+                  <span>Total</span>
+                  <span>₹{getCartTotal().toFixed(2)}</span>
+                </div>
+              </div>
+              <Button className="w-full mt-6 bg-green-600 hover:bg-green-700" onClick={handleCheckout}>
+                Checkout
+              </Button>
             </div>
           </div>
         )}
       </main>
+      <Footer />
     </div>
   )
 }

@@ -17,7 +17,7 @@ import { Edit, Plus, Trash } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Navbar from "@/components/navbar"
 
 export default function MyListingsPage() {
@@ -26,10 +26,22 @@ export default function MyListingsPage() {
   const router = useRouter()
   const [productToDelete, setProductToDelete] = useState<string | null>(null)
 
-  // Redirect if not logged in
+  // Handle redirection and data fetching in useEffect to avoid SSR issues
+  useEffect(() => {
+    if (!user) {
+      router.push("/auth/login")
+    }
+  }, [user, router])
+
+  // If not logged in, show loading state
   if (!user) {
-    router.push("/auth/login")
-    return null
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-center">
+          <p className="text-lg">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   const listings = userListings(user.id)
@@ -44,7 +56,7 @@ export default function MyListingsPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container px-4 py-8 md:px-6">
+      <main className="flex-1 container py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">My Listings</h1>
           <Button asChild className="bg-green-600 hover:bg-green-700">
@@ -74,22 +86,27 @@ export default function MyListingsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {listings.map((product) => (
-              <Card key={product.id} className="overflow-hidden">
-                <div className="aspect-square relative">
+              <Card key={product.id} className="overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow rounded-xl">
+                <div className="aspect-square relative rounded-t-xl overflow-hidden">
                   <Image src={product.image || "/placeholder.svg"} alt={product.title} fill className="object-cover" />
                 </div>
-                <CardHeader className="p-4 pb-0">
-                  <CardTitle className="text-lg line-clamp-1">{product.title}</CardTitle>
-                  <CardDescription className="line-clamp-2">{product.description}</CardDescription>
+                <CardHeader className="p-5 pb-0">
+                  <CardTitle className="text-lg line-clamp-1 text-gray-800 dark:text-gray-100">{product.title}</CardTitle>
+                  <CardDescription className="line-clamp-2 text-gray-600 dark:text-gray-300 mt-1">{product.description}</CardDescription>
                 </CardHeader>
-                <CardContent className="p-4">
+                <CardContent className="p-5">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium">${product.price.toFixed(2)}</span>
-                    <span className="text-xs text-muted-foreground">{product.category}</span>
+                    <span className="font-bold text-lg text-gray-900 dark:text-white">₹{product.price.toFixed(2)}</span>
+                    <span className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">{product.category}</span>
                   </div>
                 </CardContent>
-                <CardFooter className="p-4 pt-0 flex justify-between">
-                  <Button variant="outline" size="sm" onClick={() => router.push(`/edit-product/${product.id}`)}>
+                <CardFooter className="p-5 pt-0 flex justify-between gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-blue-600 border-blue-200 hover:bg-blue-50 hover:text-blue-700 rounded-md"
+                    onClick={() => router.push(`/edit-product/${product.id}`)}
+                  >
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                   </Button>
@@ -103,7 +120,7 @@ export default function MyListingsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600"
+                        className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 rounded-md"
                         onClick={() => setProductToDelete(product.id)}
                       >
                         <Trash className="mr-2 h-4 w-4" />

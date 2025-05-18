@@ -7,10 +7,10 @@ import { Label } from "@/components/ui/label"
 import { useAuth } from "@/context/auth-context"
 import { useProducts } from "@/context/product-context"
 import { usePurchases } from "@/context/purchase-context"
-import { Edit, Package, ShoppingBag, User, Leaf } from "lucide-react"
+import { Edit, Package, ShoppingBag, User } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Navbar from "@/components/navbar"
 
 export default function DashboardPage() {
@@ -23,10 +23,22 @@ export default function DashboardPage() {
   const [username, setUsername] = useState(user?.username || "")
   const [email, setEmail] = useState(user?.email || "")
 
-  // Redirect if not logged in
+  // Handle redirection and data fetching in useEffect to avoid SSR issues
+  useEffect(() => {
+    if (!user) {
+      router.push("/auth/login")
+    }
+  }, [user, router])
+
+  // If not logged in, show loading state
   if (!user) {
-    router.push("/auth/login")
-    return null
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse text-center">
+          <p className="text-lg">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   const listings = userListings(user.id)
@@ -40,7 +52,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 container px-4 py-8 md:px-6">
+      <main className="flex-1 container py-8">
         <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -115,7 +127,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{listing.title}</p>
-                      <p className="text-xs text-muted-foreground">${listing.price.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">₹{listing.price.toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
@@ -143,32 +155,6 @@ export default function DashboardPage() {
               <Button asChild variant="outline" className="w-full">
                 <Link href="/purchases">View Purchase History</Link>
               </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Leaf className="h-5 w-5 text-green-600" />
-                Eco Impact
-              </CardTitle>
-              <CardDescription>Your contribution to sustainability</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm">Items Reused</span>
-                  <span className="font-medium">{purchases.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">Items Recycled</span>
-                  <span className="font-medium">{listings.length}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm">CO₂ Saved (est.)</span>
-                  <span className="font-medium">{(purchases.length + listings.length) * 5}kg</span>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>

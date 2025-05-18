@@ -2,8 +2,7 @@ import type React from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import { AuthProvider } from "@/context/auth-context"
-import { CartProvider } from "@/context/cart-context"
-import { ProductProvider } from "@/context/product-context"
+import { CartProviderWrapper } from "@/components/cart-provider-wrapper"
 import { PurchaseProvider } from "@/context/purchase-context"
 import "@/app/globals.css"
 import type { Metadata } from "next"
@@ -23,18 +22,16 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light">
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
           <AuthProvider>
-            <ProductProvider>
-              <CartProvider>
-                <PurchaseProvider>
-                  {children}
-                  <Toaster />
-                </PurchaseProvider>
-              </CartProvider>
-            </ProductProvider>
+            <CartProviderWrapper>
+              <PurchaseProvider>
+                {children}
+                <Toaster />
+              </PurchaseProvider>
+            </CartProviderWrapper>
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -15,11 +15,21 @@ import { useState } from "react"
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const { login, isLoading } = useAuth()
+  const [passwordError, setPasswordError] = useState("")
+  const { login, isLoading, validatePassword } = useAuth()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate password
+    const passwordCheck = validatePassword(password)
+    if (!passwordCheck.valid) {
+      setPasswordError(passwordCheck.message)
+      return
+    }
+
+    setPasswordError("")
     await login(email, password)
   }
 
@@ -60,9 +70,14 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  setPasswordError("")
+                }}
                 required
               />
+              {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
+              <p className="text-xs text-muted-foreground">Password must be at least 8 characters long</p>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">

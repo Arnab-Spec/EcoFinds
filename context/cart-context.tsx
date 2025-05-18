@@ -2,9 +2,10 @@
 
 import type React from "react"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState, useCallback } from "react"
 import { useToast } from "@/components/ui/use-toast"
 import type { Product } from "./product-context"
+import { useProducts } from "./product-context"
 
 // Define types
 type CartItem = {
@@ -18,7 +19,7 @@ type CartContextType = {
   removeFromCart: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
-  getCartTotal: (products: Product[]) => number
+  getCartTotal: () => number
   getCartItemCount: () => number
 }
 
@@ -28,6 +29,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([])
   const { toast } = useToast()
+  const { products, getProductById } = useProducts()
 
   useEffect(() => {
     // Load cart from localStorage
@@ -87,16 +89,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     })
   }
 
-  const getCartTotal = (products: Product[]) => {
+  const getCartTotal = useCallback(() => {
     return cart.reduce((total, cartItem) => {
-      const product = products.find((p) => p.id === cartItem.productId)
+      const product = getProductById(cartItem.productId)
       return total + (product ? product.price * cartItem.quantity : 0)
     }, 0)
-  }
+  }, [cart, getProductById])
 
-  const getCartItemCount = () => {
+  const getCartItemCount = useCallback(() => {
     return cart.reduce((count, item) => count + item.quantity, 0)
-  }
+  }, [cart])
 
   return (
     <CartContext.Provider
